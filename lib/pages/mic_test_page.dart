@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class MicPage extends StatefulWidget {
@@ -35,31 +36,54 @@ class _MicPageState extends State<MicPage> {
   }
 
   void _listen() async {
-    if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
-      );
-      if (available) {
-        setState(() => _isListening = true);
-        _speech.listen(
-          onResult: (val) {
-            setState(() {
-              _text = val.recognizedWords;
-              if (_colorNames.contains(_text.toLowerCase())) {
-                _containerColor = _getColorFromName(_text.toLowerCase());
-              }
-              if (_lastWords.length == 3) {
-                _lastWords.removeAt(0);
-              }
-              _lastWords.add(_text);
-            });
-          },
+    print('Checking microphone permission...');
+    PermissionStatus permissionStatus = await Permission.microphone.status;
+
+    if (permissionStatus.isDenied) {
+      print('Microphone permission is denied. Requesting permission...');
+      permissionStatus = await Permission.microphone.request();
+    }
+
+    if (permissionStatus.isGranted) {
+      print('Microphone permission is granted.');
+      if (!_isListening) {
+        print('Initializing speech to text...');
+        bool available = await _speech.initialize(
+          onStatus: (val) => print('onStatus: $val'),
+          onError: (val) => print('onError: $val'),
         );
+        if (available) {
+          print('Speech to text is available. Starting to listen...');
+          setState(() => _isListening = true);
+          _speech.listen(
+            onResult: (val) {
+              setState(() {
+                _text = val.recognizedWords;
+                if (_colorNames.contains(_text.toLowerCase())) {
+                  _containerColor = _getColorFromName(_text.toLowerCase());
+                }
+                if (_lastWords.length == 3) {
+                  _lastWords.removeAt(0);
+                }
+                _lastWords.add(_text);
+              });
+            },
+          );
+        } else {
+          print('Speech to text is not available.');
+        }
+      } else {
+        print('Stopping to listen...');
+        setState(() => _isListening = false);
+        _speech.stop();
       }
     } else {
-      setState(() => _isListening = false);
-      _speech.stop();
+      print('Microphone permission was denied.');
+      if (permissionStatus.isPermanentlyDenied) {
+        print(
+            'Microphone permission is permanently denied. Opening app settings...');
+        openAppSettings();
+      }
     }
   }
 

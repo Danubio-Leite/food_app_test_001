@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   speech_to_text:
+  permission_handler:
 
 dev_dependencies:
   flutter_test:
