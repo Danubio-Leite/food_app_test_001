@@ -29,51 +29,83 @@ class SpeechService {
   List<String> get lastWords => _lastWords;
   Color get containerColor => _containerColor;
 
-  Future<void> listen() async {
-    PermissionStatus permissionStatus = await Permission.microphone.status;
+  Future<void> stop() async {
+    _isListening = false;
+    await _speech.stop();
+  }
 
-    if (permissionStatus.isDenied) {
-      permissionStatus = await Permission.microphone.request();
-    }
+  Future<void> listen(Function onResultCallback) async {
+    try {
+      print('Iniciando a escuta...'); // Adicionado para depuração
+      PermissionStatus permissionStatus = await Permission.microphone.status;
 
-    if (permissionStatus.isGranted) {
-      if (!_isListening) {
-        bool available = await _speech.initialize(
-          onStatus: (val) {
-            if (val == 'done' && _status != 'error_busy') {
-              _status = val;
-              _isListening = false;
-              listen();
-            }
-          },
-          onError: (val) {
-            _status = val.toString();
-          },
-        );
-        if (available) {
-          _isListening = true;
-          _speech.listen(
-            onResult: (val) {
-              _text = val.recognizedWords;
-              if (_colorNames.contains(_text.toLowerCase())) {
-                _containerColor = _getColorFromName(_text.toLowerCase());
+      if (permissionStatus.isDenied) {
+        print(
+            'Permissão de microfone negada. Solicitando permissão...'); // Adicionado para depuração
+        permissionStatus = await Permission.microphone.request();
+      }
+
+      if (permissionStatus.isGranted) {
+        print('Permissão de microfone concedida.'); // Adicionado para depuração
+        if (!_isListening) {
+          print(
+              'Inicializando o serviço de fala...'); // Adicionado para depuração
+          bool available = await _speech.initialize(
+            onStatus: (val) {
+              print(
+                  'Status do serviço de fala: $val'); // Adicionado para depuração
+              if (val == 'done' && _status != 'error_busy') {
+                _status = val;
+                _isListening = false;
+                // listen(onResultCallback);
               }
-              if (_lastWords.length == 3) {
-                _lastWords.removeAt(0);
-              }
-              _lastWords.add(_text);
             },
-            listenFor: const Duration(seconds: 10),
+            onError: (val) {
+              print(
+                  'Erro do serviço de fala: $val'); // Adicionado para depuração
+              _status = val.toString();
+            },
           );
-        } else {}
+          if (available) {
+            print(
+                'Serviço de fala disponível. Iniciando a escuta...'); // Adicionado para depuração
+            _isListening = true;
+            _speech.listen(
+              onResult: (val) {
+                _text = val.recognizedWords;
+                print(
+                    'Palavras reconhecidas: $_text'); // Adicionado para depuração
+                if (_colorNames.contains(_text.toLowerCase())) {
+                  _containerColor = _getColorFromName(_text.toLowerCase());
+                }
+                if (_lastWords.length == 3) {
+                  _lastWords.removeAt(0);
+                }
+                _lastWords.add(_text);
+                onResultCallback();
+              },
+              listenFor: const Duration(seconds: 10),
+            );
+          } else {
+            _status = 'O serviço de fala não está disponível';
+          }
+        } else {
+          print('Parando a escuta...'); // Adicionado para depuração
+          _isListening = false;
+          await _speech.stop();
+        }
       } else {
-        _isListening = false;
-        await _speech.stop();
+        if (permissionStatus.isPermanentlyDenied) {
+          print(
+              'Permissão de microfone permanentemente negada. Abrindo configurações do aplicativo...'); // Adicionado para depuração
+          openAppSettings();
+        } else {
+          _status = 'Permissão de microfone negada';
+        }
       }
-    } else {
-      if (permissionStatus.isPermanentlyDenied) {
-        openAppSettings();
-      }
+    } catch (e) {
+      print('Erro: ${e.toString()}'); // Adicionado para depuração
+      _status = 'Erro: ${e.toString()}';
     }
   }
 

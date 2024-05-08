@@ -1,9 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-
 import '../services/speech_service.dart';
 
 class MicPage extends StatefulWidget {
@@ -14,42 +9,39 @@ class MicPage extends StatefulWidget {
 }
 
 class _MicPageState extends State<MicPage> {
-  late SpeechService _speechService; // instanciando o serviço
+  late SpeechService _speechService;
   bool _isListening = false;
-  String _text = '';
   String _status = '';
-  List<String> _colorNames = [
-    'azul',
-    'verde',
-    'vermelho',
-    'amarelo',
-    'branco',
-    'preto',
-    'cinza',
-    'marrom',
-    'roxo',
-    'rosa',
-    'laranja'
-  ];
   List<String> _lastWords = [];
   Color _containerColor = Colors.blue;
 
   @override
   void initState() {
     super.initState();
-    _speechService = SpeechService(); // inicializando o serviço
+    _speechService = SpeechService();
+    _listen();
   }
 
   void _listen() async {
-    await _speechService.listen();
-    setState(() {
-      _isListening = _speechService.isListening;
-      _text = _speechService.text;
-      _status = _speechService.status;
-      _containerColor = _speechService.containerColor;
-      _lastWords = _speechService.lastWords;
+    await _speechService.listen(() {
+      setState(() {
+        _isListening = _speechService.isListening;
+        _status = _speechService.status;
+        _containerColor = _speechService.containerColor;
+        _lastWords = _speechService.lastWords;
+      });
     });
   }
+
+  //  void _listen() async {
+  //   await _speechService.listen();
+  //   setState(() {
+  //     _isListening = _speechService.isListening;
+  //     _status = _speechService.status;
+  //     _containerColor = _speechService.containerColor;
+  //     _lastWords = _speechService.lastWords;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
