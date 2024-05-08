@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+import '../services/speech_service.dart';
 
 class MicPage extends StatefulWidget {
   const MicPage({super.key});
@@ -10,9 +14,10 @@ class MicPage extends StatefulWidget {
 }
 
 class _MicPageState extends State<MicPage> {
-  late stt.SpeechToText _speech;
+  late SpeechService _speechService; // instanciando o serviço
   bool _isListening = false;
   String _text = '';
+  String _status = '';
   List<String> _colorNames = [
     'azul',
     'verde',
@@ -32,88 +37,18 @@ class _MicPageState extends State<MicPage> {
   @override
   void initState() {
     super.initState();
-    _speech = stt.SpeechToText();
+    _speechService = SpeechService(); // inicializando o serviço
   }
 
   void _listen() async {
-    print('Checking microphone permission...');
-    PermissionStatus permissionStatus = await Permission.microphone.status;
-
-    if (permissionStatus.isDenied) {
-      print('Microphone permission is denied. Requesting permission...');
-      permissionStatus = await Permission.microphone.request();
-    }
-
-    if (permissionStatus.isGranted) {
-      print('Microphone permission is granted.');
-      if (!_isListening) {
-        print('Initializing speech to text...');
-        bool available = await _speech.initialize(
-          onStatus: (val) => print('onStatus: $val'),
-          onError: (val) => print('onError: $val'),
-        );
-        if (available) {
-          print('Speech to text is available. Starting to listen...');
-          setState(() => _isListening = true);
-          _speech.listen(
-            onResult: (val) {
-              setState(() {
-                _text = val.recognizedWords;
-                if (_colorNames.contains(_text.toLowerCase())) {
-                  _containerColor = _getColorFromName(_text.toLowerCase());
-                }
-                if (_lastWords.length == 3) {
-                  _lastWords.removeAt(0);
-                }
-                _lastWords.add(_text);
-              });
-            },
-          );
-        } else {
-          print('Speech to text is not available.');
-        }
-      } else {
-        print('Stopping to listen...');
-        setState(() => _isListening = false);
-        _speech.stop();
-      }
-    } else {
-      print('Microphone permission was denied.');
-      if (permissionStatus.isPermanentlyDenied) {
-        print(
-            'Microphone permission is permanently denied. Opening app settings...');
-        openAppSettings();
-      }
-    }
-  }
-
-  Color _getColorFromName(String name) {
-    switch (name) {
-      case 'azul':
-        return Colors.blue;
-      case 'verde':
-        return Colors.green;
-      case 'vermelho':
-        return Colors.red;
-      case 'amarelo':
-        return Colors.yellow;
-      case 'branco':
-        return Colors.white;
-      case 'preto':
-        return Colors.black;
-      case 'cinza':
-        return Colors.grey;
-      case 'marrom':
-        return Colors.brown;
-      case 'roxo':
-        return Colors.purple;
-      case 'rosa':
-        return Colors.pink;
-      case 'laranja':
-        return Colors.orange;
-      default:
-        return Colors.blue;
-    }
+    await _speechService.listen();
+    setState(() {
+      _isListening = _speechService.isListening;
+      _text = _speechService.text;
+      _status = _speechService.status;
+      _containerColor = _speechService.containerColor;
+      _lastWords = _speechService.lastWords;
+    });
   }
 
   @override
@@ -165,7 +100,8 @@ class _MicPageState extends State<MicPage> {
                     color: Color.fromARGB(255, 88, 88, 88),
                   ),
                 ),
-              )
+              ),
+              Text('status: $_status'),
             ],
           ),
         ),
