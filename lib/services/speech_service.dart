@@ -19,8 +19,8 @@ class SpeechService {
     'marrom',
     'roxo',
     'rosa',
-    'laranja'
-        'blue',
+    'laranja',
+    'blue',
     'green',
     'red',
     'yellow',
@@ -102,13 +102,18 @@ class SpeechService {
     _speech.listen(
       onResult: (val) {
         _text = val.recognizedWords;
-        if (_colorNames.contains(_text.toLowerCase())) {
-          _containerColor = _getColorFromName(_text.toLowerCase());
+        List<String> words = _text.split(' ');
+        for (String word in words) {
+          if (_colorNames.contains(word.toLowerCase())) {
+            _containerColor = _getColorFromName(word.toLowerCase());
+          }
         }
         if (_lastWords.length == 3) {
           _lastWords.removeAt(0);
         }
-        _lastWords.add(_text);
+        String lastWord = words.last;
+        _lastWords.add(lastWord);
+        print('Últimas palavras: $_lastWords');
         onResultCallback();
       },
       listenFor: const Duration(seconds: 30),
