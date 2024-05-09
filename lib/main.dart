@@ -28,19 +28,19 @@ class MainApp extends StatelessWidget {
   }
 
   Future<void> _checkAndRequestPermission() async {
-    // Verifique e solicite a permissão do microfone
+    // Verifica e solicita a permissão do microfone
     PermissionStatus microphoneStatus = await Permission.microphone.status;
     if (!microphoneStatus.isGranted) {
       await Permission.microphone.request();
     }
 
-    // Verifique e solicite a permissão de reconhecimento de voz
+    // Verifica e solicita a permissão de reconhecimento de voz
     PermissionStatus speechStatus = await Permission.speech.status;
     if (!speechStatus.isGranted) {
       await Permission.speech.request();
     }
 
-    // Verifique novamente o status das permissões
+    // Verifica novamente o status das permissões
     microphoneStatus = await Permission.microphone.status;
     speechStatus = await Permission.speech.status;
 
