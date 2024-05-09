@@ -31,6 +31,9 @@ class _MicPageState extends State<MicPage> {
         _lastWords = _speechService.lastWords;
       });
     });
+    setState(() {
+      _isListening = _speechService.isListening;
+    });
   }
 
   //  void _listen() async {

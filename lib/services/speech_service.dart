@@ -3,11 +3,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class SpeechService {
-  final stt.SpeechToText _speech = stt.SpeechToText();
+  stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
   String _text = '';
   String _status = '';
-  final List<String> _lastWords = [];
+  List<String> _lastWords = [];
   final List<String> _colorNames = [
     'azul',
     'verde',
@@ -57,7 +57,6 @@ class SpeechService {
               if (val == 'done' && _status != 'error_busy') {
                 _status = val;
                 _isListening = false;
-                // listen(onResultCallback);
               }
             },
             onError: (val) {
@@ -70,22 +69,7 @@ class SpeechService {
             print(
                 'Serviço de fala disponível. Iniciando a escuta...'); // Adicionado para depuração
             _isListening = true;
-            _speech.listen(
-              onResult: (val) {
-                _text = val.recognizedWords;
-                print(
-                    'Palavras reconhecidas: $_text'); // Adicionado para depuração
-                if (_colorNames.contains(_text.toLowerCase())) {
-                  _containerColor = _getColorFromName(_text.toLowerCase());
-                }
-                if (_lastWords.length == 3) {
-                  _lastWords.removeAt(0);
-                }
-                _lastWords.add(_text);
-                onResultCallback();
-              },
-              listenFor: const Duration(seconds: 10),
-            );
+            _startListening(onResultCallback);
           } else {
             _status = 'O serviço de fala não está disponível';
           }
@@ -107,6 +91,29 @@ class SpeechService {
       print('Erro: ${e.toString()}'); // Adicionado para depuração
       _status = 'Erro: ${e.toString()}';
     }
+  }
+
+  void _startListening(Function onResultCallback) {
+    _speech.listen(
+      onResult: (val) {
+        _text = val.recognizedWords;
+        if (_colorNames.contains(_text.toLowerCase())) {
+          _containerColor = _getColorFromName(_text.toLowerCase());
+        }
+        if (_lastWords.length == 3) {
+          _lastWords.removeAt(0);
+        }
+        _lastWords.add(_text);
+        onResultCallback();
+      },
+      listenFor: const Duration(seconds: 30),
+    );
+
+    _speech.statusListener = (val) {
+      if (val == 'done' && _isListening) {
+        _startListening(onResultCallback);
+      }
+    };
   }
 
   Color _getColorFromName(String name) {
