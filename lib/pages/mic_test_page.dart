@@ -23,28 +23,22 @@ class _MicPageState extends State<MicPage> {
   }
 
   void _listen() async {
-    await _speechService.listen(() {
+    try {
+      await _speechService.listen(() {
+        setState(() {
+          _isListening = _speechService.isListening;
+          _status = _speechService.status;
+          _containerColor = _speechService.containerColor;
+          _lastWords = _speechService.lastWords;
+        });
+      });
       setState(() {
         _isListening = _speechService.isListening;
-        _status = _speechService.status;
-        _containerColor = _speechService.containerColor;
-        _lastWords = _speechService.lastWords;
       });
-    });
-    setState(() {
-      _isListening = _speechService.isListening;
-    });
+    } catch (e) {
+      print('Erro ao iniciar a escuta: $e');
+    }
   }
-
-  //  void _listen() async {
-  //   await _speechService.listen();
-  //   setState(() {
-  //     _isListening = _speechService.isListening;
-  //     _status = _speechService.status;
-  //     _containerColor = _speechService.containerColor;
-  //     _lastWords = _speechService.lastWords;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {

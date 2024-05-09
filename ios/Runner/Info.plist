@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Esta aplicação precisa de acesso ao seu microfone</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Seu aplicativo usa o reconhecimento de fala para melhorar a experiência do usuário.</string>
 </dict>
 </plist>

@@ -20,6 +20,17 @@ class SpeechService {
     'roxo',
     'rosa',
     'laranja'
+        'blue',
+    'green',
+    'red',
+    'yellow',
+    'white',
+    'black',
+    'gray',
+    'brown',
+    'purple',
+    'pink',
+    'orange'
   ];
   Color _containerColor = Colors.blue;
 
@@ -36,59 +47,53 @@ class SpeechService {
 
   Future<void> listen(Function onResultCallback) async {
     try {
-      print('Iniciando a escuta...'); // Adicionado para depuração
+      print('Iniciando a escuta...');
       PermissionStatus permissionStatus = await Permission.microphone.status;
 
       if (permissionStatus.isDenied) {
-        print(
-            'Permissão de microfone negada. Solicitando permissão...'); // Adicionado para depuração
-        permissionStatus = await Permission.microphone.request();
+        print('Permissão de microfone negada. Solicitando permissão...');
       }
 
       if (permissionStatus.isGranted) {
-        print('Permissão de microfone concedida.'); // Adicionado para depuração
+        print('Permissão de microfone concedida.');
         if (!_isListening) {
-          print(
-              'Inicializando o serviço de fala...'); // Adicionado para depuração
+          print('Inicializando o serviço de fala...');
           bool available = await _speech.initialize(
             onStatus: (val) {
-              print(
-                  'Status do serviço de fala: $val'); // Adicionado para depuração
+              print('Status do serviço de fala: $val');
               if (val == 'done' && _status != 'error_busy') {
                 _status = val;
                 _isListening = false;
               }
             },
             onError: (val) {
-              print(
-                  'Erro do serviço de fala: $val'); // Adicionado para depuração
+              print('Erro do serviço de fala: $val');
               _status = val.toString();
             },
           );
           if (available) {
-            print(
-                'Serviço de fala disponível. Iniciando a escuta...'); // Adicionado para depuração
+            print('Serviço de fala disponível. Iniciando a escuta...');
             _isListening = true;
             _startListening(onResultCallback);
           } else {
             _status = 'O serviço de fala não está disponível';
           }
         } else {
-          print('Parando a escuta...'); // Adicionado para depuração
+          print('Parando a escuta...');
           _isListening = false;
           await _speech.stop();
         }
       } else {
         if (permissionStatus.isPermanentlyDenied) {
           print(
-              'Permissão de microfone permanentemente negada. Abrindo configurações do aplicativo...'); // Adicionado para depuração
+              'Permissão de microfone permanentemente negada. Abrindo configurações do aplicativo...');
           openAppSettings();
         } else {
           _status = 'Permissão de microfone negada';
         }
       }
     } catch (e) {
-      print('Erro: ${e.toString()}'); // Adicionado para depuração
+      print('Erro: ${e.toString()}');
       _status = 'Erro: ${e.toString()}';
     }
   }
