@@ -66,6 +66,28 @@ class _VideoPageState extends State<VideoPage> {
     }
   }
 
+  Future<void> previousStep() async {
+    if (currentStep > 0) {
+      currentStep--;
+      isInitialising.value = true;
+      var oldController = controllerNotifier.value;
+      controllerNotifier.value = PodPlayerController(
+        playVideoFrom: PlayVideoFrom.vimeo(
+          videoCodes[currentStep],
+        ),
+        podPlayerConfig: const PodPlayerConfig(
+          autoPlay: true,
+          isLooping: true,
+          videoQualityPriority: [720, 360],
+        ),
+      );
+      await controllerNotifier.value!.initialise();
+      oldController?.dispose();
+      isInitialising.value = false;
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +113,16 @@ class _VideoPageState extends State<VideoPage> {
                     builder: (context, isInitialising, child) {
                       if (!isInitialising) {
                         return PodVideoPlayer(
+                          overlayBuilder: (OverLayOptions options) {
+                            return Container(
+                              color: Colors.black.withOpacity(0.0),
+                              child: Center(
+                                child: controllerNotifier.value!.isInitialised
+                                    ? const SizedBox()
+                                    : const Text('Carregando...'),
+                              ),
+                            );
+                          },
                           controller: controller!,
                           videoThumbnail: const DecorationImage(
                             image: NetworkImage(
@@ -111,7 +143,7 @@ class _VideoPageState extends State<VideoPage> {
                           },
                         );
                       } else {
-                        return const CircularProgressIndicator();
+                        return const Text('Carregando...');
                       }
                     },
                   );
@@ -128,9 +160,18 @@ class _VideoPageState extends State<VideoPage> {
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: nextStep,
-            child: const Text('Próximo passo'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: previousStep,
+                child: const Text('Passo anterior'),
+              ),
+              ElevatedButton(
+                onPressed: nextStep,
+                child: const Text('Próximo passo'),
+              ),
+            ],
           ),
         ],
       ),
