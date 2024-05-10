@@ -9,66 +9,107 @@ class VideoPage extends StatefulWidget {
 }
 
 class _VideoPageState extends State<VideoPage> {
-  late final PodPlayerController controller;
+  ValueNotifier<PodPlayerController?> controllerNotifier = ValueNotifier(null);
+  int currentStep = 0;
+  List<String> videoCodes = ['944801954', '944802967'];
+  List<String> stepTexts = [
+    'Cozinhe o bimi no vapor por 5 minutos.',
+    'Tempere o bimi com o que tiver a mão.'
+  ];
 
   @override
   void initState() {
-    controller = PodPlayerController(
+    super.initState();
+    initController();
+  }
+
+  void initController() {
+    controllerNotifier.value?.dispose();
+    controllerNotifier.value = PodPlayerController(
       playVideoFrom: PlayVideoFrom.vimeo(
-        '942732913',
+        videoCodes[currentStep],
       ),
       podPlayerConfig: const PodPlayerConfig(
-          autoPlay: false, isLooping: false, videoQualityPriority: [720, 360]),
+        autoPlay: true,
+        isLooping: true,
+        videoQualityPriority: [720, 360],
+      ),
     )..initialise();
-    super.initState();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    controllerNotifier.value?.dispose();
     super.dispose();
+  }
+
+  void nextStep() {
+    if (currentStep < videoCodes.length - 1) {
+      setState(() {
+        currentStep++;
+        initController();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              'Receita de Alho',
-              style: TextStyle(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Bimi no vapor',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: ValueListenableBuilder<PodPlayerController?>(
+                valueListenable: controllerNotifier,
+                builder: (context, controller, child) {
+                  return PodVideoPlayer(
+                    controller: controller!,
+                    videoThumbnail: const DecorationImage(
+                      image: NetworkImage(
+                        'https://www.noticiasmagazine.pt/files/2018/04/shutterstock_636478175.jpg',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                    alwaysShowProgressBar: false,
+                    onVideoError: () {
+                      return const Center(
+                        child: Text(
+                          'Erro ao carregar o vídeo.',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              stepTexts[currentStep],
+              style: const TextStyle(
                 fontSize: 20,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: PodVideoPlayer(
-                  controller: controller,
-                  // videoThumbnail: const DecorationImage(
-                  //   image: NetworkImage(
-                  //     'https://s2.glbimg.com/zY32MQou7CFi7sLKNida7Ii2rUU=/e.glbimg.com/og/ed/f/original/2016/07/12/alho.jpg',
-                  //   ),
-                  //   fit: BoxFit.cover,
-                  // ),
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Corte o alho em pedaços pequenos e frite com azeite',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+          ElevatedButton(
+            onPressed: nextStep,
+            child: const Text('Próximo passo'),
+          ),
+        ],
       ),
     );
   }
