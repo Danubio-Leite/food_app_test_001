@@ -9,6 +9,7 @@ class VideoPage extends StatefulWidget {
 }
 
 class _VideoPageState extends State<VideoPage> {
+  ValueNotifier<bool> isInitialising = ValueNotifier(false);
   ValueNotifier<PodPlayerController?> controllerNotifier = ValueNotifier(null);
   int currentStep = 0;
   List<String> videoCodes = ['944801954', '944802967'];
@@ -43,12 +44,25 @@ class _VideoPageState extends State<VideoPage> {
     super.dispose();
   }
 
-  void nextStep() {
+  Future<void> nextStep() async {
     if (currentStep < videoCodes.length - 1) {
-      setState(() {
-        currentStep++;
-        initController();
-      });
+      currentStep++;
+      isInitialising.value = true;
+      var oldController = controllerNotifier.value;
+      controllerNotifier.value = PodPlayerController(
+        playVideoFrom: PlayVideoFrom.vimeo(
+          videoCodes[currentStep],
+        ),
+        podPlayerConfig: const PodPlayerConfig(
+          autoPlay: true,
+          isLooping: true,
+          videoQualityPriority: [720, 360],
+        ),
+      );
+      await controllerNotifier.value!.initialise();
+      oldController?.dispose();
+      isInitialising.value = false;
+      setState(() {});
     }
   }
 
@@ -72,24 +86,33 @@ class _VideoPageState extends State<VideoPage> {
               child: ValueListenableBuilder<PodPlayerController?>(
                 valueListenable: controllerNotifier,
                 builder: (context, controller, child) {
-                  return PodVideoPlayer(
-                    controller: controller!,
-                    videoThumbnail: const DecorationImage(
-                      image: NetworkImage(
-                        'https://www.noticiasmagazine.pt/files/2018/04/shutterstock_636478175.jpg',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                    alwaysShowProgressBar: false,
-                    onVideoError: () {
-                      return const Center(
-                        child: Text(
-                          'Erro ao carregar o vídeo.',
-                          style: TextStyle(
-                            fontSize: 20,
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: isInitialising,
+                    builder: (context, isInitialising, child) {
+                      if (!isInitialising) {
+                        return PodVideoPlayer(
+                          controller: controller!,
+                          videoThumbnail: const DecorationImage(
+                            image: NetworkImage(
+                              'https://www.noticiasmagazine.pt/files/2018/04/shutterstock_636478175.jpg',
+                            ),
+                            fit: BoxFit.cover,
                           ),
-                        ),
-                      );
+                          alwaysShowProgressBar: false,
+                          onVideoError: () {
+                            return const Center(
+                              child: Text(
+                                'Erro ao carregar o vídeo.',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const CircularProgressIndicator();
+                      }
                     },
                   );
                 },
