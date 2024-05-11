@@ -1,5 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_azure_tts/flutter_azure_tts.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pod_player/pod_player.dart';
 
 class VideoPage extends StatefulWidget {
@@ -30,7 +37,7 @@ class _VideoPageState extends State<VideoPage> {
   void initState() {
     super.initState();
     initController();
-    speak();
+    // speak_flutter_tts();
   }
 
   void initController() {
@@ -47,25 +54,65 @@ class _VideoPageState extends State<VideoPage> {
     )..initialise();
   }
 
-  Future<void> speak() async {
-    // List ttsVoices = await flutterTts.getVoices;
-    // var availableVoices =
-    //     ttsVoices.cast<Map>().map((e) => e.cast<String, String>()).toList();
-    await flutterTts.setPitch(0.8);
-    await flutterTts.setSpeechRate(0.4);
-    await flutterTts.setLanguage('pt-PT');
-    // print(availableVoices
-    //     .firstWhere((element) => element['locale']!.contains('pt-BR')));
-    // await flutterTts.setVoice(availableVoices[12]);
+  // Future<void> speak_flutter_tts() async {
+  //   // List ttsVoices = await flutterTts.getVoices;
+  //   // var availableVoices =
+  //   //     ttsVoices.cast<Map>().map((e) => e.cast<String, String>()).toList();
+  //   await flutterTts.setPitch(0.8);
+  //   await flutterTts.setSpeechRate(0.4);
+  //   await flutterTts.setLanguage('pt-PT');
+  //   // print(availableVoices
+  //   //     .firstWhere((element) => element['locale']!.contains('pt-BR')));
+  //   // await flutterTts.setVoice(availableVoices[12]);
 
-    await flutterTts.speak(stepVoice[currentStep]);
-  }
+  //   await flutterTts.speak(stepVoice[currentStep]);
+  // }
+
+  // Future<void> speak_azure() async {
+  //   // Inicialize o AzureTts com suas credenciais
+  //   AzureTts.init(
+  //       subscriptionKey: 'ec6500ba76e94145b579727d2695c75b',
+  //       region: 'brazilsouth',
+  //       withLogs: true);
+
+  //   // Obtenha as vozes disponíveis
+  //   final voicesResponse = await AzureTts.getAvailableVoices();
+
+  //   // Escolha uma voz em português
+  //   final voice =
+  //       voicesResponse.voices.firstWhere((v) => v.locale.startsWith('pt-'));
+
+  //   // Gere o áudio para um texto
+  //   TtsParams params = TtsParams(
+  //       voice: voice,
+  //       audioFormat: AudioOutputFormat.audio16khz32kBitrateMonoMp3,
+  //       text: stepVoice[currentStep]);
+
+  //   final ttsResponse = await AzureTts.getTts(params);
+
+  //   // Obtenha os bytes de áudio
+  //   final audioBytes = ttsResponse.audio.buffer.asUint8List();
+
+  //   // Salve o áudio em um arquivo local
+  //   String dir = (await getApplicationDocumentsDirectory()).path;
+  //   String path = '$dir/audio.mp3';
+  //   File audioFile = File(path);
+  //   await audioFile.writeAsBytes(audioBytes);
+
+  //   // Reproduza o áudio
+  //   AudioPlayer audioPlayer = AudioPlayer();
+  //   await audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(path)));
+  //   await audioPlayer.play();
+  // }
 
   @override
   void dispose() {
     controllerNotifier.value?.dispose();
     super.dispose();
+  
   }
+
+  A VERSAO DO POD_PLAYER ESTÁ DESATUALIZADA, NÃO FUNCIONA 
 
   Future<void> nextStep() async {
     if (currentStep < videoCodes.length - 1) {
@@ -86,10 +133,11 @@ class _VideoPageState extends State<VideoPage> {
       oldController?.dispose();
       isInitialising.value = false;
       setState(() {});
-      await flutterTts.setPitch(0.8);
-      await flutterTts.setSpeechRate(0.4);
-      await flutterTts.setLanguage('pt-PT');
-      speak();
+      // await flutterTts.setPitch(0.8);
+      // await flutterTts.setSpeechRate(0.4);
+      // await flutterTts.setLanguage('pt-PT');
+      // speak_flutter_tts();
+      // speak_azure();
     }
   }
 
@@ -112,10 +160,11 @@ class _VideoPageState extends State<VideoPage> {
       oldController?.dispose();
       isInitialising.value = false;
       setState(() {});
-      await flutterTts.setPitch(0.8);
-      await flutterTts.setSpeechRate(0.4);
-      await flutterTts.setLanguage('pt-PT');
-      speak();
+      // await flutterTts.setPitch(0.8);
+      // await flutterTts.setSpeechRate(0.4);
+      // await flutterTts.setLanguage('pt-PT');
+      // speak_flutter_tts();
+      // speak_azure();
     }
   }
 
@@ -167,6 +216,7 @@ class _VideoPageState extends State<VideoPage> {
                               child: Text(
                                 'Erro ao carregar o vídeo.',
                                 style: TextStyle(
+                                  color: Colors.white,
                                   fontSize: 20,
                                 ),
                               ),
