@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:pod_player/pod_player.dart';
 
 class VideoPage extends StatefulWidget {
@@ -13,15 +14,23 @@ class _VideoPageState extends State<VideoPage> {
   ValueNotifier<PodPlayerController?> controllerNotifier = ValueNotifier(null);
   int currentStep = 0;
   List<String> videoCodes = ['944801954', '944802967'];
+
   List<String> stepTexts = [
     'Cozinhe o bimi no vapor por 5 minutos.',
     'Tempere o bimi com o que tiver a mão.'
   ];
+  List<String> stepVoice = [
+    'O bimi pode até se consumido cru, mas cozinhando por cinco minutos encontramos o ponto ideal mantendo a crocancia e conseguindo ressaltar seu sabor.',
+    'Miguel, agora é a hora de temperar o bimi. Use o que tiver a mão, seja sal, pimenta, azeite, limão, ou até mesmo um molho de sua preferência. O importante é que você sinta prazer ao degustar essa delícia.'
+  ];
+
+  FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
     super.initState();
     initController();
+    speak();
   }
 
   void initController() {
@@ -36,6 +45,20 @@ class _VideoPageState extends State<VideoPage> {
         videoQualityPriority: [720, 360],
       ),
     )..initialise();
+  }
+
+  Future<void> speak() async {
+    // List ttsVoices = await flutterTts.getVoices;
+    // var availableVoices =
+    //     ttsVoices.cast<Map>().map((e) => e.cast<String, String>()).toList();
+    await flutterTts.setPitch(0.8);
+    await flutterTts.setSpeechRate(0.4);
+    await flutterTts.setLanguage('pt-PT');
+    // print(availableVoices
+    //     .firstWhere((element) => element['locale']!.contains('pt-BR')));
+    // await flutterTts.setVoice(availableVoices[12]);
+
+    await flutterTts.speak(stepVoice[currentStep]);
   }
 
   @override
@@ -63,6 +86,10 @@ class _VideoPageState extends State<VideoPage> {
       oldController?.dispose();
       isInitialising.value = false;
       setState(() {});
+      await flutterTts.setPitch(0.8);
+      await flutterTts.setSpeechRate(0.4);
+      await flutterTts.setLanguage('pt-PT');
+      speak();
     }
   }
 
@@ -85,6 +112,10 @@ class _VideoPageState extends State<VideoPage> {
       oldController?.dispose();
       isInitialising.value = false;
       setState(() {});
+      await flutterTts.setPitch(0.8);
+      await flutterTts.setSpeechRate(0.4);
+      await flutterTts.setLanguage('pt-PT');
+      speak();
     }
   }
 
