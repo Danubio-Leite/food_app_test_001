@@ -1,8 +1,11 @@
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app_test_001/app.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'env/env.dart';
 
 void main() {
+  OpenAI.apiKey = Env.gpt_key;
   runApp(const MainApp());
 }
 
