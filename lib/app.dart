@@ -12,12 +12,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  static const List<Widget> _widgetOptions = <Widget>[
-    VideoPage(),
-    MicPage(),
-    FirebasePage(),
-    AssistantPage(),
+  int _selectedIndex = 3;
+  static List<Widget> _widgetOptions = <Widget>[
+    const VideoPage(),
+    const MicPage(),
+    const FirebasePage(),
+    ChatPage(),
   ];
 
   void _onItemTapped(int index) {

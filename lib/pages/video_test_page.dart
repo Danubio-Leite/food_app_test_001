@@ -1,11 +1,10 @@
+// ignore_for_file: unused_import
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_azure_tts/flutter_azure_tts.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pod_player/pod_player.dart';
 
@@ -37,7 +36,7 @@ class _VideoPageState extends State<VideoPage> {
   void initState() {
     super.initState();
     initController();
-    // speak_flutter_tts();
+    speak_flutter_tts();
   }
 
   void initController() {
@@ -54,19 +53,19 @@ class _VideoPageState extends State<VideoPage> {
     )..initialise();
   }
 
-  // Future<void> speak_flutter_tts() async {
-  //   // List ttsVoices = await flutterTts.getVoices;
-  //   // var availableVoices =
-  //   //     ttsVoices.cast<Map>().map((e) => e.cast<String, String>()).toList();
-  //   await flutterTts.setPitch(0.8);
-  //   await flutterTts.setSpeechRate(0.4);
-  //   await flutterTts.setLanguage('pt-PT');
-  //   // print(availableVoices
-  //   //     .firstWhere((element) => element['locale']!.contains('pt-BR')));
-  //   // await flutterTts.setVoice(availableVoices[12]);
+  Future<void> speak_flutter_tts() async {
+    // List ttsVoices = await flutterTts.getVoices;
+    // var availableVoices =
+    //     ttsVoices.cast<Map>().map((e) => e.cast<String, String>()).toList();
+    await flutterTts.setPitch(0.8);
+    await flutterTts.setSpeechRate(0.4);
+    await flutterTts.setLanguage('pt-PT');
+    // print(availableVoices
+    //     .firstWhere((element) => element['locale']!.contains('pt-BR')));
+    // await flutterTts.setVoice(availableVoices[12]);
 
-  //   await flutterTts.speak(stepVoice[currentStep]);
-  // }
+    await flutterTts.speak(stepVoice[currentStep]);
+  }
 
   // Future<void> speak_azure() async {
   //   // Inicialize o AzureTts com suas credenciais
@@ -109,10 +108,7 @@ class _VideoPageState extends State<VideoPage> {
   void dispose() {
     controllerNotifier.value?.dispose();
     super.dispose();
-  
   }
-
-  A VERSAO DO POD_PLAYER ESTÁ DESATUALIZADA, NÃO FUNCIONA 
 
   Future<void> nextStep() async {
     if (currentStep < videoCodes.length - 1) {
@@ -133,11 +129,10 @@ class _VideoPageState extends State<VideoPage> {
       oldController?.dispose();
       isInitialising.value = false;
       setState(() {});
-      // await flutterTts.setPitch(0.8);
-      // await flutterTts.setSpeechRate(0.4);
-      // await flutterTts.setLanguage('pt-PT');
-      // speak_flutter_tts();
-      // speak_azure();
+      await flutterTts.setPitch(0.8);
+      await flutterTts.setSpeechRate(0.4);
+      await flutterTts.setLanguage('pt-PT');
+      speak_flutter_tts();
     }
   }
 
@@ -160,11 +155,10 @@ class _VideoPageState extends State<VideoPage> {
       oldController?.dispose();
       isInitialising.value = false;
       setState(() {});
-      // await flutterTts.setPitch(0.8);
-      // await flutterTts.setSpeechRate(0.4);
-      // await flutterTts.setLanguage('pt-PT');
-      // speak_flutter_tts();
-      // speak_azure();
+      await flutterTts.setPitch(0.8);
+      await flutterTts.setSpeechRate(0.4);
+      await flutterTts.setLanguage('pt-PT');
+      speak_flutter_tts();
     }
   }
 
